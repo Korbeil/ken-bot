@@ -12,6 +12,10 @@ impl EventHandler for Handler {
         let channel_id = env::var("DISCORD_CHANNEL_ID").expect("Expected a DISCORD_CHANNEL_ID in the environment");
         let target_channel = ChannelId(channel_id.parse::<u64>().unwrap());
 
+        if target_channel != msg.channel_id {
+            return;
+        }
+
         let user_id = env::var("DISCORD_USER_ID").expect("Expected a DISCORD_USER_ID in the environment");
         let target_user = UserId(user_id.parse::<u64>().unwrap());
         
@@ -26,13 +30,15 @@ impl EventHandler for Handler {
         };
 
         for message in &messages {
-            if message.id != msg.id && target_channel == message.channel_id && target_user == message.author.id {
-                match message.delete(&ctx) {
-                    Ok(ok) => ok,
-                    Err(err) => {
-                        println!("Error deleting channel messages: {:?}", err);
-                        return;
-                    }
+            if message.id == msg.id || target_user != message.author.id {
+                continue;
+            }
+
+            match message.delete(&ctx) {
+                Ok(ok) => ok,
+                Err(err) => {
+                    println!("Error deleting channel messages: {:?}", err);
+                    return;
                 }
             }
         }

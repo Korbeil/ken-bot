@@ -1,6 +1,6 @@
 [package]
 name = "ken-bot"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Baptiste Leduc <baptiste.leduc@gmail.com>"]
 edition = "2018"
 
