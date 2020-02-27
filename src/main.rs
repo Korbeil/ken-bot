@@ -1,9 +1,15 @@
-use std::env;
+extern crate chrono;
 
+use std::env;
+use chrono::Utc;
 use serenity::{
     model::{channel::Message, gateway::Ready, id::{ChannelId, UserId}},
     prelude::*,
 };
+
+fn datetime() -> String {
+    return Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
+}
 
 struct Handler;
 
@@ -24,7 +30,7 @@ impl EventHandler for Handler {
         }) {
             Ok(messages) => messages,
             Err(err) => {
-                println!("Error getting channel messages: {:?}", err);
+                println!("[{}] Error getting channel messages: {:?}", datetime(), err);
                 return;
             }
         };
@@ -35,9 +41,11 @@ impl EventHandler for Handler {
             }
 
             match message.delete(&ctx) {
-                Ok(ok) => ok,
+                Ok(_) => {
+                    println!("[{}] Deleted \"{}\" message from \"{}\"", datetime(), message.content, message.author.name)
+                },
                 Err(err) => {
-                    println!("Error deleting channel messages: {:?}", err);
+                    println!("[{}] Error deleting channel messages: {:?}", datetime(), err);
                     return;
                 }
             }
@@ -45,7 +53,7 @@ impl EventHandler for Handler {
     }
 
     fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        println!("[{}] {} is connected!", datetime(), ready.user.name);
     }
 }
 
@@ -55,6 +63,6 @@ fn main() {
     let mut client = Client::new(&token, Handler).expect("Err creating client");
 
     if let Err(why) = client.start() {
-        println!("Client error: {:?}", why);
+        println!("[{}] Client error: {:?}", datetime(), why);
     }
 }
